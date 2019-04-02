@@ -29,7 +29,7 @@ for (d in seq_along(dirnames)){
               xname="lon", yname="lat")
   
   ascii_outfile = paste0("/Users/james/Documents/Delaware/urban_climate/datasets/UrbanExtentProjections_SSPs1-5_2010-2100_v1_GRID_1_8_dgr/",dirnames[[d]], "/", dirnames[[d]], ".asc")
-  writeRaster(temrast, filename = ascii_outfile,format="ascii", datatype="INT4S",overwrite=TRUE)
+  writeRaster(temrast, filename = ascii_outfile,format="ascii", datatype="INT4S",overwrite=TRUE, prj=TRUE)
   
   # add to that netcdf file the crs definitions
   loc = nc_open(nc_outfile, write = TRUE)
@@ -80,7 +80,7 @@ for (d in seq_along(dirnames)){
               xname="lon", yname="lat")
   
   ascii_outfile = paste0("/Users/james/Documents/Delaware/urban_climate/datasets/",dirnames[[d]], "/", gtiffnames[[d]], ".asc")
-  writeRaster(temrast, filename = ascii_outfile,format="ascii", datatype="INT4S",overwrite=TRUE)
+  writeRaster(temrast, filename = ascii_outfile,format="ascii", datatype="INT4S",overwrite=TRUE, prj=TRUE)
   
   # add to that netcdf file the crs definitions
   loc = nc_open(nc_outfile, write = TRUE)

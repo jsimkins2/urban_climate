@@ -45,10 +45,9 @@ for (i in seq_len(150)){
   # note that the ascii files are all wrong here
   if (is.na(ncVal) == FALSE){
     if (ncVal != tifVal | ncVal != asciiVal){
-      print(paste0("BAD DATA ", "ncVal=",ncVal, " tifVal=",tifVal, " asciiVal=", asciiVal," row", randRow, " col", randCol, " file",randSSP[[1]]))
+        print(paste0("NOT EQUAL ", "ncVal=",ncVal, " tifVal=",tifVal, " asciiVal=", asciiVal," row", randRow, " col", randCol, " file",randSSP[[1]]))
     } else {
-      print(paste0("GOOD DATA ", "ncVal=",ncVal, " tifVal=",tifVal, " asciiVal=", asciiVal))
+      print(paste0("ALL EQUAL ", "ncVal=",ncVal, " tifVal=",tifVal, " asciiVal=", asciiVal))
     }
   }
 }
-
