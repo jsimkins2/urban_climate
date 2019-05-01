@@ -40,14 +40,14 @@ writeRaster(gp.resampled, filename = "/Users/james/Documents/Delaware/urban_clim
 
 gp1 = projectRaster(landmask1km,crs = '+proj=merc +lon_0=0 +lat_ts=0 +x_0=0 +y_0=0 +a=6378137 +b=6378137 +units=m +no_defs')
 
-p1 = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_2000_GLOBE_38m/GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p2.tif")
-p2 = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_2000_GLOBE_38m/reprojected_upscaled_globep2.tif")
+p1 = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_2000_GLOBE_38m/GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p1.tif")
+p2 = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_2000_GLOBE_38m/GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p2.tif")
 
 
 
 
 
-
+rep = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_2000_GLOBE_38m/landmask.tif")
 
 
 
@@ -64,9 +64,9 @@ p2 = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_200
 #-scale 0 1
 
 
-#gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -tr 928 956 -r average -te -20042148 -7518879 -626172.1 16906648 GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p1.tif jing_p1.tif
+#gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -tr 928 956 -r average GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p1.tif jing_p1.tif
 
-#gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -tr 928 956 -r average -te -2191602 -7514066 20041884 18441301 GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p2.tif jing_p2.tif
+#gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -tr 928 956 -r average GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p2.tif jing_p2.tif
 
 
 #gdaltranslate -scale 0 1 
