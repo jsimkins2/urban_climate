@@ -47,26 +47,24 @@ p2 = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_200
 
 
 
-rep = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_2000_GLOBE_38m/landmask.tif")
+rep = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_2000_GLOBE_38m/out_dem.tif")
 
 
+# reproject Jing's grid to mercator and use that resolution for the aggregation in the next step
+# gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -s_srs '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0' baseYr_rural_2000.tif test.tif
 
+# aggregate from 38m to 1km using average approach
+# gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -tr 1030.559469528862564 1030.585972279782709 -r average GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p1.tif agg_p1.tif
+# gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -tr 1030.559469528862564 1030.585972279782709 -r average GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p2.tif agg_p2.tif
 
+# combine the aggregated geotiffs together
+# gdal_merge.py agg_p1.tif agg_p2.tif combined.tif
 
+# reproject the combined tif and specify the exact resolution and extent
+# note that if we didn't specify this would be the resolution/extent 0.008333165638817 0.008333165638817 / -180 -55.7721945 179.9927556 83.6416667
+# we also must specify the extents here because Jing's grid extent is slightly larger than GHS grid extent
+# gdalwarp combined.tif combined_reprojected.tif -tr 0.008333333333300 0.008333333333300 -te -180 -55.7750000 180 83.6416667 -s_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -t_srs '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
 
-r = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_2000_GLOBE_38m/out_dem.tif")
+# change the scale to 0 to 1 - 32 bit floats
+# gdal_translate -ot Float32 -scale 0 255 0 1 combined_reprojected.tif 1km_p1_p2.tif
 
-
-
-
-
-
-#-scale 0 1
-
-
-#gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -tr 1030.559 1030.586 -r average GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p1.tif jing_p1.tif
-
-#gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -tr 1030.559 1030.586 -r average GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p2.tif jing_p2.tif
-
-
-#gdaltranslate -scale 0 1 
