@@ -11,20 +11,20 @@
 
 #----1---- Reproject Jing's grid to mercator
 ## Use the resulting resolution from this reprojection in the next step
-# gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -s_srs '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0' baseYr_rural_2000.tif test.tif
+# gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -s_srs '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0' land_area_km1.tif test.tif
 
 #----2---- Aggregate from 38m to 1km using Averaging
-# gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -tr 1030.559469528862564 1030.585972279782709 -r average GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p1.tif agg_p1.tif
-# gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -tr 1030.559469528862564 1030.585972279782709 -r average GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p2.tif agg_p2.tif
+# gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -tr 1050.975237190205917 1050.975237190205917 -r average GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p1.tif agg_p1.tif
+# gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -tr 1050.975237190205917 1050.975237190205917 -r average GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p2.tif agg_p2.tif
 
 #----3---- Combine the aggregated geotiffs
 ## note that these two parts are split down the Atlantic a bit west of the prime meridian
 # gdal_merge.py agg_p1.tif agg_p2.tif combined.tif
 
 #----4---- Reproject the combined & aggregated geotiffs to Jing's grid
-## note that if we didn't specify this would be the resolution/extent 0.008333165638817 0.008333165638817 / -180 -55.7721945 179.9927556 83.6416667
+## note that if we didn't specify this would be the resolution/extent  0.008333333333000 0.008333333333000 / -180 -58.0000000 180 85.0000000
 ## we also must specify the extents here because Jing's grid extent is slightly larger than GHS grid extent
-# gdalwarp combined.tif combined_reprojected_GHS.tif -of GTIFF -tr 0.008333333333300 0.008333333333300 -te -180 -55.7750000 180 83.6416667 -s_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -t_srs '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
+# gdalwarp combined.tif combined_reprojected_GHS.tif -of GTIFF -tr 0.008333333333000 0.008333333333000 -te -180 -58.0000000 180 85.0000000 -s_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -t_srs '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
 
 #----5---- Specify NoData value, Compress, Scale from 0 to 1, and turn values to 32 bit floats
 ## Note that we must do the following because GDAL automatically converts all 0s to NoData even if specified otherwise. Further, even if
