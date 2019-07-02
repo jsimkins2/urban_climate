@@ -139,7 +139,8 @@ for lon in range(0,len(sspLon)-1):
             nanmask = kmAreaVal < 0
             gridGHS = np.ma.array(gridGHS, mask=nanmask)
             kmAreaVal = np.ma.array(kmAreaVal, mask=nanmask)
-            
+            kmAreaVal.fill_value=-3.4028235e+38
+            gridGHS.fill_value=-3.4028235e+38
             # define weight variables
             amtToAloc = areaVal * sspVal
             rawWgt = areaVal * gridGHS
@@ -189,6 +190,7 @@ for lon in range(0,len(sspLon)-1):
 
             outputAmt = outputAmt / kmAreaVal
             outputAmt[outputAmt < 0] = 0
+            outputAmt.fill_value=-3.4028235e+38
             alloDF[bottomLat:topLat,lon1:lon2] = outputAmt
         else:
             alloDF[bottomLat:topLat,lon1:lon2] = -3.4028235e+38
