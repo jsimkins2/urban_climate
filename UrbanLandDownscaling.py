@@ -19,6 +19,7 @@ startTime = datetime.now()
 def x2lon(x, y):
     xp = a * x + b * y + xoff
     return(xp)
+
 def y2lat(x, y):
     yp = d * x + e * y + yoff
     return(yp)
@@ -27,6 +28,7 @@ def find_nearest(array, value):
     array = np.asarray(array)
     idx = (np.abs(array - value)).argmin()
     return idx
+
 ''' Use this for each ssp - run 5 cores
 velocity_cartopy_dark.py
 with mp.Pool(processes=4) as pool:
@@ -45,9 +47,11 @@ ghsLat=[]
 for row in range(0,sWrows):
     col=0
     ghsLon.append(x2lon(row,col))
+
 for col in range(0,sWcolms):
     row=0
     ghsLat.append(y2lat(row,col))
+
 band = sWds.GetRasterBand(1)
 spatialWeight = band.ReadAsArray()
 
@@ -84,10 +88,10 @@ sspLat=[]
 for row in range(0,rows):
     col=0
     sspLon.append(x2lon(row,col))
+
 for col in range(0,colms):
     row=0
     sspLat.append(y2lat(row,col))
-
 
 # Now that we have the lats & lons we need to find the nearest grid cell locations
 # we need to normalize the lat/lons 
@@ -99,8 +103,8 @@ sspLat = sorted((np.asarray(sspLat)) + 90, reverse=True)
 
 # initialize blank dataset
 alloDF = np.zeros((spatialWeight.shape))
-#lat=334
-#lon=735
+lat=334
+lon=735
 for lon in range(0,len(sspLon)-1):
     for lat in range(0,len(sspLat)-1):
         if lon==720:
@@ -129,9 +133,13 @@ for lon in range(0,len(sspLon)-1):
         lon2=lon1+15
         
         if sspVal != -3.4028235e+38:
-            # grab 1km GHS dataset
+            # grab 1km variables and place nanmask in there
             gridGHS = spatialWeight[bottomLat:topLat,lon1:lon2]
             kmAreaVal = kmlandArea[bottomLat:topLat,lon1:lon2]
+            nanmask = kmAreaVal < 0
+            gridGHS = np.ma.array(gridGHS, mask=nanmask)
+            kmAreaVal = np.ma.array(kmAreaVal, mask=nanmask)
+            
             # define weight variables
             amtToAloc = areaVal * sspVal
             rawWgt = areaVal * gridGHS
@@ -141,6 +149,7 @@ for lon in range(0,len(sspLon)-1):
             if sumWgt >= amtToAloc:
                 outputAmt = rawWgt * amtToAloc / sumWgt
             else:
+                
                 outputAmt = rawWgt * amtToAloc / sumWgt
                 diff1km = outputAmt - amtAvailLnd
                 overflowCells =  np.ma.masked_less_equal(diff1km, 0)
