@@ -103,8 +103,8 @@ sspLat = sorted((np.asarray(sspLat)) + 90, reverse=True)
 
 # initialize blank dataset
 alloDF = np.zeros((spatialWeight.shape))
-lat=334
-lon=735
+#lat=334
+#lon=735
 for lon in range(0,len(sspLon)-1):
     for lat in range(0,len(sspLat)-1):
         if lon==720:
