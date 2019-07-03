@@ -54,7 +54,6 @@ for col in range(0,sWcolms):
 
 band = sWds.GetRasterBand(1)
 spatialWeight = band.ReadAsArray()
-
 # Read in our land Area 
 file = "/Users/james/Documents/Delaware/urban_climate/datasets/land_area_km1.tif"
 ds = gdal.Open(file)
@@ -190,8 +189,9 @@ for lon in range(0,len(sspLon)-1):
 
             outputAmt = outputAmt / kmAreaVal
             outputAmt[outputAmt < 0] = 0
+            outputAmt[outputAmt > 1] = 1
             outputAmt.fill_value=-3.4028235e+38
-            alloDF[bottomLat:topLat,lon1:lon2] = outputAmt
+            alloDF[bottomLat:topLat,lon1:lon2] = outputAmt.filled()
         else:
             alloDF[bottomLat:topLat,lon1:lon2] = -3.4028235e+38
 
@@ -204,6 +204,7 @@ outdata = driver.Create(outFileName, finalrows, finalcols, 1, gdal.GDT_Float32)
 outdata.SetGeoTransform(sWds.GetGeoTransform())##sets same geotransform as input
 outdata.SetProjection(sWds.GetProjection())##sets same projection as input
 outdata.GetRasterBand(1).WriteArray(alloDF) 
+outdata.SetNoDataValue(float(-3.4028235e+38))
 outdata.FlushCache() ##saves to disk!!
 outdata = None
 band=None
