@@ -53,6 +53,7 @@ for col in range(0,sWcolms):
     ghsLat.append(y2lat(row,col))
 
 band = sWds.GetRasterBand(1)
+band.SetNoDataValue(-3.4028235e+38)
 spatialWeight = band.ReadAsArray()
 # Read in our land Area 
 file = "/Users/james/Documents/Delaware/urban_climate/datasets/land_area_km1.tif"
@@ -102,8 +103,8 @@ sspLat = sorted((np.asarray(sspLat)) + 90, reverse=True)
 
 # initialize blank dataset
 alloDF = np.zeros((spatialWeight.shape))
-#lat=334
-#lon=735
+#lat=342
+#lon=552
 for lon in range(0,len(sspLon)-1):
     for lat in range(0,len(sspLat)-1):
         if lon==720:
@@ -149,8 +150,11 @@ for lon in range(0,len(sspLon)-1):
             if sumWgt >= amtToAloc:
                 outputAmt = rawWgt * amtToAloc / sumWgt
             else:
-                
-                outputAmt = rawWgt * amtToAloc / sumWgt
+                if sumWgt == 0.0:
+                    outputAmt = rawWgt * amtToAloc
+                else:
+                    outputAmt = rawWgt * amtToAloc / sumWgt
+
                 diff1km = outputAmt - amtAvailLnd
                 overflowCells =  np.ma.masked_less_equal(diff1km, 0)
                 amtOverflow = np.sum(overflowCells)
@@ -168,7 +172,11 @@ for lon in range(0,len(sspLon)-1):
                         sumWgt = 0
                     if np.sum(sumWgt) > 0:
                         rawWgt[notfullmask] = rawWgt[notfullmask]
-                        overflowReceiveAmt = rawWgt * amtOverflow / sumWgt
+                        if sumWgt == 0.0:
+                            overflowReceiveAmt = rawWgt * amtOverflow
+                        else:
+                            overflowReceiveAmt = rawWgt * amtOverflow / sumWgt
+
                         outputAmt[notfullmask] += overflowReceiveAmt[notfullmask]
                         diff1km = outputAmt - amtAvailLnd
                         overflowCells =  np.ma.masked_less_equal(diff1km, 0)
@@ -178,7 +186,11 @@ for lon in range(0,len(sspLon)-1):
                     else: # sumWgt=0, you've run out of cells that were at least a little urban in 2000
                         rawWgt[:,:]= amtAvailLnd
                         sumWgt = np.sum(rawWgt)
-                        overflowReceiveAmt = rawWgt * amtOverflow / sumWgt
+                        if sumWgt == 0.0:
+                            overflowReceiveAmt = rawWgt * amtOverflow
+                        else:
+                            overflowReceiveAmt = rawWgt * amtOverflow / sumWgt
+
                         outputAmt[notfullmask] += overflowReceiveAmt[notfullmask]
                         diff1km = outputAmt - amtAvailLnd
                         overflowCells =  np.ma.masked_less_equal(diff1km, 0)
@@ -204,13 +216,14 @@ outdata = driver.Create(outFileName, finalrows, finalcols, 1, gdal.GDT_Float32)
 outdata.SetGeoTransform(sWds.GetGeoTransform())##sets same geotransform as input
 outdata.SetProjection(sWds.GetProjection())##sets same projection as input
 outdata.GetRasterBand(1).WriteArray(alloDF) 
-outdata.SetNoDataValue(float(-3.4028235e+38))
+outdata.GetRasterBand(1).SetNoDataValue(-3.4028235e+38)
 outdata.FlushCache() ##saves to disk!!
 outdata = None
 band=None
 ds=None
 
 print(datetime.now() - startTime)
+
 
 
 
