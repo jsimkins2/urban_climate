@@ -103,8 +103,10 @@ sspLat = sorted((np.asarray(sspLat)) + 90, reverse=True)
 
 # initialize blank dataset
 alloDF = np.zeros((spatialWeight.shape))
-#lat=342
+#lat=342 470 1088
 #lon=552
+#lat = 470
+#lon=1088
 for lon in range(0,len(sspLon)-1):
     for lat in range(0,len(sspLat)-1):
         if lon==720:
@@ -132,15 +134,15 @@ for lon in range(0,len(sspLon)-1):
         lon1=lon*15
         lon2=lon1+15
         
-        if sspVal != -3.4028235e+38:
+        if sspVal != -340282346638528859811704183484516925440:
             # grab 1km variables and place nanmask in there
             gridGHS = spatialWeight[bottomLat:topLat,lon1:lon2]
             kmAreaVal = kmlandArea[bottomLat:topLat,lon1:lon2]
             nanmask = kmAreaVal < 0
             gridGHS = np.ma.array(gridGHS, mask=nanmask)
             kmAreaVal = np.ma.array(kmAreaVal, mask=nanmask)
-            kmAreaVal.fill_value=-3.4028235e+38
-            gridGHS.fill_value=-3.4028235e+38
+            kmAreaVal.fill_value=-340282346638528859811704183484516925440
+            gridGHS.fill_value=-340282346638528859811704183484516925440
             # define weight variables
             amtToAloc = areaVal * sspVal
             rawWgt = areaVal * gridGHS
@@ -202,10 +204,10 @@ for lon in range(0,len(sspLon)-1):
             outputAmt = outputAmt / kmAreaVal
             outputAmt[outputAmt < 0] = 0
             outputAmt[outputAmt > 1] = 1
-            outputAmt.fill_value=-3.4028235e+38
+            outputAmt.fill_value=-340282346638528859811704183484516925440
             alloDF[bottomLat:topLat,lon1:lon2] = outputAmt.filled()
         else:
-            alloDF[bottomLat:topLat,lon1:lon2] = -3.4028235e+38
+            alloDF[bottomLat:topLat,lon1:lon2] = -340282346638528859811704183484516925440
 
 
 [finalcols, finalrows] = spatialWeight.shape
@@ -216,13 +218,15 @@ outdata = driver.Create(outFileName, finalrows, finalcols, 1, gdal.GDT_Float32)
 outdata.SetGeoTransform(sWds.GetGeoTransform())##sets same geotransform as input
 outdata.SetProjection(sWds.GetProjection())##sets same projection as input
 outdata.GetRasterBand(1).WriteArray(alloDF) 
-outdata.GetRasterBand(1).SetNoDataValue(-3.4028235e+38)
+outdata.GetRasterBand(1).SetNoDataValue(-340282346638528859811704183484516925440)
 outdata.FlushCache() ##saves to disk!!
 outdata = None
 band=None
 ds=None
 
 print(datetime.now() - startTime)
+
+
 
 
 
