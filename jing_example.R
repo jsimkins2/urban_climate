@@ -1,5 +1,11 @@
 ########
-# "NATIONAL" total amount control: CtryList - list of country names, natTotals - total amount new urban land development per country (km^2), estDF - dataframe of spatial model estimated t2 urban land fraction (newR), t1-t2 change in that faction (newD), t1-t2 amount of new development (amtD = grid land area * newD), available amount of land for new development (availLnd = grid land area * (usable land mask fraction - t1 urban land fraction)), and t1 urban land faction (rT1)
+# "NATIONAL" total amount control: 
+# CtryList - list of country names, natTotals - total amount new urban land development per country (km^2), 
+# estDF - dataframe of spatial model estimated t2 urban land fraction (newR), 
+# t1-t2 change in that faction (newD), 
+# t1-t2 amount of new development (amtD = grid land area * newD)
+# available amount of land for new development (availLnd = grid land area * (usable land mask fraction - t1 urban land fraction))
+# t1 urban land faction (rT1)
 
 alloDF <- data.frame()
 for (CTRY in CtryList) {

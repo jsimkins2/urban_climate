@@ -1,18 +1,48 @@
-# BU_land 1km creation
+# Aggregate 38m GHS to 1km
 # 
 # James Simkins
 ############################################################################################
-# as of right now, I'm upscaling the globe p1 file using this string
-# gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' 
-#          -tr 1000 1000 -r average GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p1.tif upscaled_globep1.tif
-# from this website  
-#https://www.geos.ed.ac.uk/~smudd/TopoTutorials/html/tutorial_raster_conversion.html
+# Below is the GDAL code I used to achieve this aggregation task. I would check each output in R
+# which is why this isn't in a shell script. The below link is the first step I took here.
+#
+# https://www.geos.ed.ac.uk/~smudd/TopoTutorials/html/tutorial_raster_conversion.html
 ############################################################################################
 
 
+#----1---- Reproject Jing's grid to mercator
+## Use the resulting resolution from this reprojection in the next step
+# gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -s_srs '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0' land_area_km1.tif test.tif
+
+#----2---- Aggregate from 38m to 1km using Averaging
+# gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -tr 1050.975237190205917 1050.975237190205917 -r average GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p1.tif agg_p1.tif
+# gdalwarp -t_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -tr 1050.975237190205917 1050.975237190205917 -r average GHS_BUILT_LDS2000_GLOBE_R2016A_3857_38_v1_0_p2.tif agg_p2.tif
+
+#----3---- Combine the aggregated geotiffs
+## note that these two parts are split down the Atlantic a bit west of the prime meridian
+# gdal_merge.py agg_p1.tif agg_p2.tif combined.tif
+
+#----4---- Reproject the combined & aggregated geotiffs to Jing's grid
+## note that if we didn't specify this would be the resolution/extent  0.008333333333000 0.008333333333000 / -180 -58.0000000 180 85.0000000
+## we also must specify the extents here because Jing's grid extent is slightly larger than GHS grid extent
+# gdalwarp combined.tif combined_reprojected_GHS.tif -of GTIFF -tr 0.008333333333000 0.008333333333000 -te -180 -58.0000000 180 85.0000000 -s_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -t_srs '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
+
+#----5---- Specify NoData value, Compress, Scale from 0 to 1, and turn values to 32 bit floats
+## Note that we must do the following because GDAL automatically converts all 0s to NoData even if specified otherwise. Further, even if
+## we try to specify a specific NoData value, GDAL ignores that value unless you're creating it from a VRT file that already has the metadata
+## rather than a geotiff.
+
+## Here we convert all 0's in the dataset to NaN's. GDAL treats 0 as NoData already but it's not listed as a NoData
+## value in the metadata. This quick function just adds it to the metdata officially which allows the VRT 
+## creation to work properly. Once we have the VRT with appropriate metadata, we can proceed to make it into a GEOTIFF
+## with the above specifications.
+
+# gdal_calc.py -A combined_reprojected_GHS.tif --outfile=resultcalc.tif --calc="A*(A>0)" --NoDataValue=0
+# gdalbuildvrt -srcnodata 0 GHS_Vrt.vrt resultcalc.tif 
+# gdal_translate -of GTIFF -co COMPRESS=LZW -ot Float32 -scale 1 101 0 1 -a_nodata -3.40282306073709653e+38 GHS_Vrt.vrt GHS_1km_agg.tif
 
 ############################################################################################
-# Begin Script
+# Attempting to do this with R failed, it took too long and isn't as precise as GDAL.
+# However, below are example of the approach I was taking. 
 ############################################################################################
 
 # load required libraries
@@ -48,6 +78,7 @@ p2 = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_200
 
 
 rep = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_2000_GLOBE_38m/output.tif")
+<<<<<<< HEAD:BU_land1km.R
 
 
 # reproject Jing's grid to mercator and use that resolution for the aggregation in the next step
@@ -100,4 +131,7 @@ gdal_calc.py -A rep_test.tif --outfile=resultcalc.tif --calc="A*(A>0)" --NoDataV
 gdalbuildvrt -srcnodata 0 myVrt.vrt resultcalc.tif 
 gdal_translate -of GTIFF -co COMPRESS=LZW -ot Float32 -scale 1 101 0 1 -a_nodata -3.40282306073709653e+38 myVrt.vrt output.tif
 
+=======
+
+>>>>>>> 1b9f85e7675852cf15e4b9531d7bb895098e43b0:BU_land1km_aggregation.R
 
