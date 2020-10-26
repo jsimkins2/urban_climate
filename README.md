@@ -1,4 +1,4 @@
 # urban_climate
-Urban climate work with Jing Gao
+Urban climate modeling prediction code
 
 #

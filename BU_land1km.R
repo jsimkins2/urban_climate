@@ -47,7 +47,7 @@ p2 = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_200
 
 
 
-rep = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_2000_GLOBE_38m/out_dem.tif")
+rep = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_2000_GLOBE_38m/output.tif")
 
 
 # reproject Jing's grid to mercator and use that resolution for the aggregation in the next step
@@ -59,12 +59,45 @@ rep = raster("/Users/james/Documents/Delaware/urban_climate/datasets/TestData_20
 
 # combine the aggregated geotiffs together
 # gdal_merge.py agg_p1.tif agg_p2.tif combined.tif
+# 
 
 # reproject the combined tif and specify the exact resolution and extent
 # note that if we didn't specify this would be the resolution/extent 0.008333165638817 0.008333165638817 / -180 -55.7721945 179.9927556 83.6416667
 # we also must specify the extents here because Jing's grid extent is slightly larger than GHS grid extent
-# gdalwarp combined.tif combined_reprojected.tif -tr 0.008333333333300 0.008333333333300 -te -180 -55.7750000 180 83.6416667 -s_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -t_srs '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
+# gdalwarp combined.tif combined_reprojected_GHS.tif -of GTIFF -tr 0.008333333333300 0.008333333333300 -te -180 -55.7750000 180 83.6416667 -s_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -t_srs '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
 
 # change the scale to 0 to 1 - 32 bit floats
-# gdal_translate -ot Float32 -scale 0 255 0 1 combined_reprojected.tif 1km_p1_p2.tif
+# gdal_translate -of GTIFF PROFILE=GeoTIFF -co COMPRESS=LZW -ot Float32 -scale 1 101 0 1 combined_reprojected_GHS.tif GHS_1km_agg.tif 
+
+
+
+
+
+
+
+
+
+
+# attempting to place no data values to -3.40282306073709653e+38
+# gdal_merge.py agg_p1.tif agg_p2.tif combined.tif
+# gdalwarp combined.tif combined_reprojected_GHS.tif -of GTIFF -tr 0.008333333333300 0.008333333333300 -te -180 -55.7750000 180 83.6416667 -s_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -t_srs '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
+# gdal_calc.py --type Float32 -A combined_reprojected_GHS.tif --outfile=resultcalc.tif --calc="A*(A>0)" --NoDataValue=0
+# gdal_translate resultcalc.tif result.tif -a_nodata -3.40282306073709653e+38 -ot Float32 -f GTIFF
+# gdal_translate -of GTIFF -co COMPRESS=LZW -ot Float32 -scale 1 101 0 1 result.tif GHS_1km_agg.tif
+
+# gdal_translate -of GTIFF -co COMPRESS=LZW -ot Float32 -scale 1 101 0 1 -a_nodata "value [-3.40282306073709653e+38]" combined_reprojected_GHS.tif GHS_1km_agg.tif 
+
+
+
+
+# gdalbuildvrt -srcnodata -0.010 myVrt.vrt GHS_1km_agg.tif 
+# gdal_translate -of GTIFF -co COMPRESS=LZW -ot Float32 -a_nodata -3.40282306073709653e+38 myVrt.vrt output.tif
+
+
+# this is the latest version that I need to check. It may work
+gdalwarp combined.tif rep_test.tif -of GTIFF -tr 0.008333333333300 0.008333333333300 -te -180 -55.7750000 180 83.6416667 -s_srs '+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs' -t_srs '+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0'
+gdal_calc.py -A rep_test.tif --outfile=resultcalc.tif --calc="A*(A>0)" --NoDataValue=0
+gdalbuildvrt -srcnodata 0 myVrt.vrt resultcalc.tif 
+gdal_translate -of GTIFF -co COMPRESS=LZW -ot Float32 -scale 1 101 0 1 -a_nodata -3.40282306073709653e+38 myVrt.vrt output.tif
+
 
