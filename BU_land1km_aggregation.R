@@ -1,4 +1,4 @@
-# Aggregate 38m GHS to 1km
+# Aggregate 38m GHS data to 1km resolution
 # 
 # James Simkins
 ############################################################################################
